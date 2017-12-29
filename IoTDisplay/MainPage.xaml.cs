@@ -1,23 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel.Core;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.System.Threading;
 using Windows.UI.Core;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
-using Windows.UI.Xaml.Navigation;
-
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace IoTDisplay
 {
@@ -26,36 +12,60 @@ namespace IoTDisplay
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private readonly PhotoReader _reader;
+
+        private ThreadPoolTimer _timer;
+        private bool _firstTimer;
+
         public MainPage()
         {
             this.InitializeComponent();
 
-            // create Flickr feed reader for unicorn images
-            var reader = new FlickrReader("unicorn");
+            // create photo reader
+            _reader = new PhotoReader(
+                "http://my-cloud.kmb.home:8080", 
+                "/Public/Shared%20Pictures/Slideshow"
+                );
 
-            TimeSpan period = TimeSpan.FromSeconds(5);
-            // display neew images every five seconds
-            ThreadPoolTimer PeriodicTimer = ThreadPoolTimer.CreatePeriodicTimer(
-                async (source) =>
-                {
-                    // get next image
-                    var image = await reader.GetImage();
+            // cycle images
+            _firstTimer = true;
+            _timer = ThreadPoolTimer.CreatePeriodicTimer(NextImage, TimeSpan.FromSeconds(3));
+        }
 
-                    if (image != null)
-                    {
-                        // we have to update UI in UI thread only
-                        await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-                        () =>
-                        {
-                            // create and load bitmap
-                            BitmapImage bitmap = new BitmapImage();
-                            bitmap.UriSource = new Uri(image, UriKind.Absolute);
-                            // display image
-                            splashImage.Source = bitmap;
-                        }
-                        );
-                    }
-                }, period);
+        private async void NextImage(ThreadPoolTimer timer)
+        {
+            if (_firstTimer)
+            {
+                timer.Cancel();
+                _timer = null;
+
+                _firstTimer = false;
+            }
+
+            // get next image
+            var image = await _reader.GetImage();
+
+            if (image != null)
+            {
+                // we have to update UI in UI thread only
+                await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
+                    CoreDispatcherPriority.Normal, 
+                    () => ShowImage(image)
+                );
+            }
+
+            if (_timer == null)
+                _timer = ThreadPoolTimer.CreatePeriodicTimer(NextImage, TimeSpan.FromSeconds(42));
+        }
+
+        private void ShowImage(string imageUri)
+        {
+            // create and load bitmap
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.UriSource = new Uri(imageUri, UriKind.Absolute);
+
+            // display image
+            splashImage.Source = bitmap;
         }
     }
 }
