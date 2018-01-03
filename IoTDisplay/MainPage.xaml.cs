@@ -14,7 +14,7 @@ namespace IoTDisplay
     {
         private readonly PhotoReader _reader;
 
-        private ThreadPoolTimer _timer1, _timer2;
+        private ThreadPoolTimer _timer1;
         private bool _firstTimer;
 
         public MainPage()
@@ -29,22 +29,7 @@ namespace IoTDisplay
 
             // cycle images
             _firstTimer = true;
-            _timer1 = ThreadPoolTimer.CreatePeriodicTimer(NextImage, TimeSpan.FromSeconds(3));
-
-            // show time
-            _timer2 = ThreadPoolTimer.CreatePeriodicTimer(ShowTime, TimeSpan.FromSeconds(2));
-        }
-
-        private async void ShowTime(ThreadPoolTimer timer)
-        {
-            // we have to update UI in UI thread only
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
-                CoreDispatcherPriority.Normal, () =>
-                {
-                    DateTime now = DateTime.Now;
-                    textDate.Text = now.ToString("MMM d, yyyy");
-                    textTime.Text = now.ToString("h:mm tt");
-                });
+            _timer1 = ThreadPoolTimer.CreatePeriodicTimer(NextImage, TimeSpan.FromSeconds(5));
         }
 
         private async void NextImage(ThreadPoolTimer timer)

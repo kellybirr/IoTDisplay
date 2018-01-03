@@ -9,7 +9,5 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Image Name="splashImage" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform" Source="Assets/cute-unicorn-clipart-unicorn4.png"/>
-        <TextBlock Name="textDate" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontFamily="Arial" FontSize="48" Text="" FontWeight="Bold" Margin="10,0,0,10"/>
-        <TextBlock Name="textTime" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontFamily="Arial" FontSize="48" Text="" FontWeight="Bold" Margin="0,0,10,10"/>
     </Grid>
 </Page>
