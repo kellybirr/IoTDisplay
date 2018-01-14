@@ -48,7 +48,7 @@ namespace IoTDisplay
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
                 CoreDispatcherPriority.Normal, () => {
                     textTime.Text = _clockText;
-                    textTimeShadow.Text = _clockText;
+                    //textTimeShadow.Text = _clockText;
                 });
         }
 

@@ -9,7 +9,6 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Image Name="splashImage" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform" Source="Assets/cute-unicorn-clipart-unicorn4.png"/>
-        <TextBlock Name="textTimeShadow" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontFamily="Arial" FontSize="42" Text="" FontWeight="Bold" Margin="0,0,44,29" Foreground="Gray"/>
-        <TextBlock Name="textTime" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontFamily="Arial" FontSize="42" Text="" FontWeight="Bold" Margin="0,0,45,30" Foreground="White"/>
+        <TextBlock Name="textTime" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontFamily="Arial" FontSize="42" Text="" FontWeight="Bold" Margin="0,0,42,30" Foreground="White"/>
     </Grid>
 </Page>
