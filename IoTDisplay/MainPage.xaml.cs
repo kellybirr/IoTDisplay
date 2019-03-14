@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
+using Windows.Foundation;
 using Windows.System.Threading;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
@@ -75,17 +79,59 @@ namespace IoTDisplay
             }
 
             if (_timer1 == null)
-                _timer1 = ThreadPoolTimer.CreatePeriodicTimer(NextImage, TimeSpan.FromSeconds(42));
+                _timer1 = ThreadPoolTimer.CreatePeriodicTimer(NextImage, TimeSpan.FromSeconds(18));
+
+            // cleanup
+            BmpCache.Cleanup();
         }
 
         private void ShowImage(string imageUri)
         {
-            // create and load bitmap
-            BitmapImage bitmap = new BitmapImage();
-            bitmap.UriSource = new Uri(imageUri, UriKind.Absolute);
+            // check cache
+            if (! BmpCache.Cache.TryGetValue(imageUri, out BmpCache cacheItem))
+            {
+                cacheItem = new BmpCache
+                {
+                    Uri = imageUri,
+                    LastShownUtc = DateTime.UtcNow,
+                    Bitmap = new BitmapImage
+                    {
+                        UriSource = new Uri(imageUri, UriKind.Absolute)
+                    }
+                };
+
+                BmpCache.Cache[cacheItem.Uri] = cacheItem;
+            }
 
             // display image
-            splashImage.Source = bitmap;
+            cacheItem.LastShownUtc = DateTime.UtcNow;
+            splashImage.Source = cacheItem.Bitmap;
+        }
+    }
+
+    class BmpCache
+    {
+        public static Dictionary<string, BmpCache> Cache = new Dictionary<string, BmpCache>();
+        private static DateTime _lastCleanup = DateTime.UtcNow;
+
+        public string Uri { get; set; }
+        public BitmapImage Bitmap { get; set; }
+        public DateTime LastShownUtc { get; set; }
+
+        internal static void Cleanup()
+        {
+            if (_lastCleanup > DateTime.UtcNow.AddMinutes(-15))
+                return;
+
+            _lastCleanup = DateTime.UtcNow;
+
+            DateTime hourAgo = DateTime.UtcNow.AddHours(-4);
+            string[] toRemove = (from b in Cache.Values where b.LastShownUtc < hourAgo select b.Uri).ToArray();
+
+            foreach (string key in toRemove)
+                Cache.Remove(key);
+
+            GC.Collect(3, GCCollectionMode.Optimized, false);
         }
     }
 }
